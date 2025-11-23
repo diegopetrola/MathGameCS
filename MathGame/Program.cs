@@ -1,21 +1,39 @@
 ﻿
-using MathGame;
-
-// Font Credits: patorjk.com 
-const string title = "       __  __   _ _____ _  _    ___   _   __  __ ___         \r\n      |  \\/  | /_\\_   _| || |  / __| /_\\ |  \\/  | __|        \r\n      | |\\/| |/ _ \\| | | __ | | (_ |/ _ \\| |\\/| | _|         \r\n      |_|  |_/_/ \\_\\_| |_||_|  \\___/_/ \\_\\_|  |_|___|        \r\n                                                     \r\n";
+using MathGame.Game;
+using static MathGame.Print.PrintFunctions;
 
 GameManager game = new();
 
-void printMenu()
+while (true)
 {
-    Console.Clear();
-    Console.WriteLine(title);
-    Console.WriteLine("\t\t\t[N]ew Game");
-    Console.WriteLine("\t\t\t[H]istory");
-    Console.WriteLine("\t\t\t[Q]uit");
+    PrintMenu(game);
+    var key = Console.ReadKey(true).Key;
+
+    switch (key)
+    {
+        case (ConsoleKey.Q):
+            ExitGame();
+            break;
+        case (ConsoleKey.N):
+            SetupGame();
+            break;
+        case (ConsoleKey.H):
+            PrintHistory(game);
+            break;
+        case (ConsoleKey.C):
+            ChangeDifficulty();
+            break;
+    };
 }
 
-void setupGame()
+void ExitGame()
+{
+    Console.Clear();
+    Console.WriteLine("\t\t\tThank you for playing!");
+    Environment.Exit(0);
+}
+
+void SetupGame()
 {
     Dictionary<ConsoleKey, string> operatorsMap = new()
     {
@@ -40,6 +58,7 @@ void setupGame()
     Console.WriteLine("\t\t\t    [2] Subtraction (-)");
     Console.WriteLine("\t\t\t    [3] Multiplication (*)");
     Console.WriteLine("\t\t\t    [4] Division (/)");
+    Console.Write("\t\t\t    ");
 
     while (!operatorsMap.ContainsKey(key))
     {
@@ -50,17 +69,16 @@ void setupGame()
     {
         Console.Clear();
         Console.WriteLine(title);
-        Console.WriteLine($"\t\t\tHow many rounds? {msg}");
+        Console.Write($"\t\t\tHow many rounds? {msg}");
         _ = int.TryParse(Console.ReadLine(), out rounds);
         if (rounds < 1) msg = "Please type a number greater than 0.";
     }
     operatorsMap.TryGetValue(key, out var op);
     if (op is null) throw new Exception("Error while parsing operation, operation is null.");
-    playGame(rounds, op);
-
+    PlayGame(rounds, op);
 }
 
-void playGame(int rounds, string op)
+void PlayGame(int rounds, string op)
 {
     int curRound = 0;
     while (curRound < rounds)
@@ -69,48 +87,37 @@ void playGame(int rounds, string op)
         Console.Clear();
         Console.WriteLine(title);
         Console.WriteLine();
-        Console.Write($"\t\t\t{round.n1} {round.operation} {round.n2} = ");
+        Console.WriteLine($"\t\t\tDifficulty: {game.difficulty}");
+        Console.WriteLine($"\t\t\tRound: {curRound}/{rounds}");
+        Console.Write($"\t\t\t{round.n1.ToString("N0")} {round.operation} {round.n2.ToString("N0")} = ");
         _ = int.TryParse(Console.ReadLine(), out var answer);
         bool correct = game.CheckAnswer(answer);
         Console.WriteLine(correct ? "\t\t\tCorrect!" : "\t\t\tIncorrect...");
-        Console.WriteLine("\t\t\tPress any key to next round...");
+        Console.Write("\t\t\tPress any key to next round...");
         Console.ReadKey();
         curRound++;
     }
 }
 
-void printHistory()
+void ChangeDifficulty()
 {
-    Console.Clear();
-    Console.Write(title);
-
-    foreach(var r in game.getHistory())
+    Dictionary<string, Difficulty> difMap = new();
+    int count = 1;
+    foreach (var dif in Enum.GetNames<Difficulty>())
     {
-        Console.WriteLine($"\t\t\t{r.n1} {r.operation} {r.n2} = {r.answer}. You answered {(r.res ? "Correctly": "Incorrectly")} ");
+        difMap.Add(count.ToString(), Enum.Parse<Difficulty>(dif));
+        count++;
     }
 
-    Console.WriteLine("\t\t\tPress any key to go back to the main meny...");
-    Console.ReadKey();
-}
+    PrintChangeDiffMenu();
 
-while (true)
-{
-    printMenu();
-    var key = Console.ReadKey(true).Key;
-
-    switch (key)
+    string read = "undef";
+    Difficulty gameDif;
+    while (!difMap.TryGetValue(read, out gameDif))
     {
-        case ConsoleKey.Q:
-            Console.Clear();
-            Console.WriteLine("\t\t\tThank you for playing!");
-            Environment.Exit(0);
-            break;
-        case ConsoleKey.N:
-            setupGame();
-            break;
-        case ConsoleKey.H:
-            printHistory();
-            break;
+        read = Console.ReadLine() ?? "undef";
+        Console.WriteLine(difMap.TryGetValue(read, out gameDif));
     }
-}
 
+    game.difficulty = gameDif;
+}
