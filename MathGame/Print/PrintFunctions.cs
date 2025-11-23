@@ -27,7 +27,7 @@ public static class PrintFunctions{
                 $"{r.answer}. You answer was: {(r.win ? "correct!" : "incorrect...")} ");
         }
 
-        Console.Write($"You scored a total of {game.CalculatePoints()}!");
+        Console.Write($"\t\tYou scored a total of {game.CalculatePoints()}!");
         Console.WriteLine();
         Console.WriteLine();
         Console.Write("\t\tPress any key to go back to the main menu...");
