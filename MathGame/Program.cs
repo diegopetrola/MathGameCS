@@ -23,7 +23,7 @@ while (true)
         case (ConsoleKey.C):
             ChangeDifficulty();
             break;
-    };
+    }
 }
 
 void ExitGame()

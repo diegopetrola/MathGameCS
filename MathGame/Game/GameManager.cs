@@ -6,7 +6,7 @@ public class GameManager
     private readonly Random rand = new();
     public Difficulty difficulty = Difficulty.Normal;
     private List<Round> currentSession = [];
-    public int SessionPoints { get; private set; } = 0;
+    public int SessionPoints { get; private set; }
 
     public void StartSession()
     {
@@ -114,7 +114,7 @@ public class GameManager
 public class Round
 {
     public string Operation { get; internal set; } = "";
-    public bool Won { get; internal set; } = false;
+    public bool Won { get; internal set; }
     internal int answer;
     public int N1 { get; internal set; }
     public int N2 { get; internal set; }
