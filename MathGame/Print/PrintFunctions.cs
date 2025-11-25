@@ -14,6 +14,7 @@ public static class PrintFunctions{
         Console.WriteLine($"\t\t\t[C]hange Difficulty (Current: {game.difficulty})");
         Console.WriteLine("\t\t\t[H]istory");
         Console.WriteLine("\t\t\t[Q]uit");
+        Console.WriteLine("\t\t\t");
     }    
 
     public static void PrintHistory(GameManager game)
@@ -21,13 +22,13 @@ public static class PrintFunctions{
         Console.Clear();
         Console.Write(title);
 
-        foreach (var r in game.getHistory())
+        foreach (var r in game.GetHistory())
         {
-            Console.WriteLine($"\t\t{r.n1.ToString("N0")} {r.operation} {r.n2.ToString("N0")} = \\" +
-                $"{r.answer}. You answer was: {(r.win ? "correct!" : "incorrect...")} ");
+            Console.WriteLine($"\t{r.N1.ToString("N0")} {r.Operation} {r.N2.ToString("N0")} = " +
+                $"{r.answer}. \tYou answer was: {(r.Won ? "correct!" : "incorrect...")} ");
         }
-
-        Console.Write($"\t\tYou scored a total of {game.CalculatePoints()}!");
+        Console.WriteLine();
+        Console.Write($"\tYou scored a total of {game.CalculatePoints()}!");
         Console.WriteLine();
         Console.WriteLine();
         Console.Write("\t\tPress any key to go back to the main menu...");

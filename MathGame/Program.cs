@@ -81,6 +81,7 @@ void SetupGame()
 void PlayGame(int rounds, string op)
 {
     int curRound = 0;
+    game.StartSession();
     while (curRound < rounds)
     {
         var round = game.PlayRound(op);
@@ -88,15 +89,17 @@ void PlayGame(int rounds, string op)
         Console.WriteLine(title);
         Console.WriteLine();
         Console.WriteLine($"\t\t\tDifficulty: {game.difficulty}");
-        Console.WriteLine($"\t\t\tRound: {curRound}/{rounds}");
-        Console.Write($"\t\t\t{round.n1.ToString("N0")} {round.operation} {round.n2.ToString("N0")} = ");
+        Console.WriteLine($"\t\t\tRound: {curRound}/{rounds}\tPoints:{game.SessionPoints}");
+        Console.WriteLine();
+        Console.Write($"\t\t\t{round.N1.ToString("N0")} {round.Operation} {round.N2.ToString("N0")} = ");
         _ = int.TryParse(Console.ReadLine(), out var answer);
-        bool correct = game.CheckAnswer(answer);
-        Console.WriteLine(correct ? "\t\t\tCorrect!" : "\t\t\tIncorrect...");
+        int points = game.CheckAnswer(answer);
+        Console.WriteLine(points>0? $"\t\t\tCorrect! You got scored {points}!" : "\t\t\tIncorrect...");
         Console.Write("\t\t\tPress any key to next round...");
         Console.ReadKey();
         curRound++;
     }
+    game.EndSession();
 }
 
 void ChangeDifficulty()

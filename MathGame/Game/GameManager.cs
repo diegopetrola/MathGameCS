@@ -2,14 +2,28 @@
 
 public class GameManager
 {
-    private List<Round> history = [];
+    private readonly List<Round> History = [];
     private readonly Random rand = new();
-    private Round? currentRound;
     public Difficulty difficulty = Difficulty.Normal;
+    private List<Round> currentSession = [];
+    public int SessionPoints { get; private set; } = 0;
+
+    public void StartSession()
+    {
+        SessionPoints = 0;
+        currentSession = [];
+    }
+
+    public int EndSession()
+    {
+        int points = CalculatePoints(currentSession);
+        currentSession = [];
+        return points;
+    }
 
     public Round PlayRound(string op)
     {
-        currentRound = op switch
+        var currentRound = op switch
         {
             "+" => SetupSumRound(),
             "-" => SetupSubRound(),
@@ -17,75 +31,81 @@ public class GameManager
             "/" => SetupDivRound(),
             _ => throw new Exception("Unknown operator")
         };
-
-        history.Add(currentRound);
+        currentRound.difficulty = difficulty;
+        currentSession.Add(currentRound);
+        History.Add(currentRound);
 
         return currentRound;
     }
     private Round SetupDivRound()
     {
         var r = new Round();
-        int maxN = (int) (Math.Pow(10, (int)difficulty));
-        r.n2 = 1+rand.Next((int) Math.Sqrt(maxN)); //n2 is smaller to avoid n1 being too large
+        int maxN = (int)(Math.Pow(10, (int)difficulty));
+        r.N2 = 1 + rand.Next((int)Math.Sqrt(maxN)); //N2 is smaller to avoid n1 being too large
         r.answer = rand.Next(maxN);
-        r.n1 = r.n2 * r.answer;
-        r.operation = "/";
+        r.N1 = r.N2 * r.answer;
+        r.Operation = "/";
         return r;
     }
     private Round SetupMultRound()
     {
         var r = new Round();
         int maxN = (int)Math.Pow(10, (int)difficulty);
-        r.n1 = rand.Next(maxN);
-        r.n2 = rand.Next(maxN);
-        r.operation = "*";
-        r.answer = r.n1 * r.n2;
+        r.N1 = rand.Next(maxN);
+        r.N2 = rand.Next(maxN);
+        r.Operation = "*";
+        r.answer = r.N1 * r.N2;
         return r;
     }
     private Round SetupSumRound()
-    {        
+    {
         var r = new Round();
-        // dividing by two garantee ans in bounds of our difficulty
-        int maxN = (int) Math.Pow(10, (int)difficulty);
-        r.n1 = rand.Next(maxN) ;
-        r.n2 = rand.Next(maxN);
-        r.difficulty = difficulty;
-        r.answer = r.n1 + r.n2;
-        r.operation = "+";
+        int maxN = (int)Math.Pow(10, (int)difficulty);
+        r.N1 = rand.Next(maxN);
+        r.N2 = rand.Next(maxN);
+        r.answer = r.N1 + r.N2;
+        r.Operation = "+";
         return r;
     }
     private Round SetupSubRound()
     {
         var r = new Round();
         int maxN = (int)Math.Pow(10, (int)difficulty);
-        int[] values = [rand.Next(maxN),rand.Next(maxN)];
+        int[] values = [rand.Next(maxN), rand.Next(maxN)];
         values.Sort();
         // n1 is always bigger so ans >= 0
-        r.n1 = values[1];
-        r.n2 = values[0];
-        r.answer = r.n1 - r.n2;
-        r.operation = "-";
+        r.N1 = values[1];
+        r.N2 = values[0];
+        r.answer = r.N1 - r.N2;
+        r.Operation = "-";
         return r;
     }
 
-    public bool CheckAnswer(int answer)
+    public int CheckAnswer(int answer)
     {
-        if (currentRound is null) throw new Exception("Start a game first, huh?");
-        currentRound.win = answer == currentRound.answer;
-        return currentRound.win;
+        var round = currentSession.LastOrDefault() ?? throw new Exception("Start a round first huh?");
+        round.Won = answer == round.answer;
+        var roundPoints = round.Won ? (int)round.difficulty : 0;
+        SessionPoints += roundPoints;
+        return roundPoints;
     }
 
-    public List<Round> getHistory()
+    public List<Round> GetHistory()
     {
-        return history;
+        return History;
     }
 
     public int CalculatePoints()
     {
+        return CalculatePoints(History);
+    }
+
+    private int CalculatePoints(List<Round> ar)
+    {
         int points = 0;
-        foreach(var r in history)
+        foreach (var r in ar)
         {
-            points += r.win ? (int)r.difficulty : 0;
+            points += r.Won ? (int)r.difficulty : 0;
         }
         return points;
     }
@@ -93,19 +113,19 @@ public class GameManager
 
 public class Round
 {
-    public string operation { get; internal set; } = "";
-    public bool win { get; internal set; } = false;
+    public string Operation { get; internal set; } = "";
+    public bool Won { get; internal set; } = false;
     internal int answer;
-    public int n1 { get; internal set; }
-    public int n2 { get; internal set; }
+    public int N1 { get; internal set; }
+    public int N2 { get; internal set; }
     public Difficulty difficulty;
-    public int points { get; internal set; }
+    public int Points { get; internal set; }
 }
 
 public enum Difficulty
 {
     Easy = 1,
-    Normal=2,
-    Hard=4,
-    VonNeumann=8
+    Normal = 2,
+    Hard = 4,
+    VonNeumann = 8
 }
